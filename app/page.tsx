@@ -92,7 +92,7 @@ if (totalItens === 0) errs.itens = 'Selecione ao menos 1 item.'
       let json: Record<string, unknown> = {}
       try { json = await res.json() } catch { alert('Erro de comunicação com o servidor.'); return }
       if (!res.ok) { alert(json.error ?? 'Erro desconhecido.'); return }
-      if (json.whatsappLink) setWaLink(json.whatsappLink)
+      if (json.whatsappLink) setWaLink(json.whatsappLink as string)
       setTotalPago(totalValor)
       setResumo({
         nome: data.nome,
