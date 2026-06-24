@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
     const { ok, link } = await notificarWhatsApp({ nome, telefone, quantidade, itens, total, modalidade, endereco })
 
-    return NextResponse.json({ id, whatsappOk: ok, whatsappLink: link }, { status: 201 })
+    return NextResponse.json({ id: id?.toString(), whatsappOk: ok, whatsappLink: link }, { status: 201 })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err)
     return NextResponse.json({ error: message }, { status: 500 })
