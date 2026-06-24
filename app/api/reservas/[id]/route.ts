@@ -1,17 +1,24 @@
 import { NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { createClient } from '@libsql/client'
+
+function getClient() {
+  return createClient({
+    url: process.env.TURSO_DATABASE_URL!,
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  })
+}
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const { status } = await req.json()
-  const db = getDb()
-  db.prepare('UPDATE reservas SET status = ? WHERE id = ?').run(status, id)
+  const client = getClient()
+  await client.execute({ sql: 'UPDATE reservas SET status = ? WHERE id = ?', args: [status, id] })
   return NextResponse.json({ ok: true })
 }
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const db = getDb()
-  db.prepare('DELETE FROM reservas WHERE id = ?').run(id)
+  const client = getClient()
+  await client.execute({ sql: 'DELETE FROM reservas WHERE id = ?', args: [id] })
   return NextResponse.json({ ok: true })
 }
