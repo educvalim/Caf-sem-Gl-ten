@@ -1,11 +1,14 @@
 import { createClient } from '@libsql/client'
 
-const client = createClient({
-  url: process.env.TURSO_DATABASE_URL!,
-  authToken: process.env.TURSO_AUTH_TOKEN,
-})
+function getClient() {
+  return createClient({
+    url: process.env.TURSO_DATABASE_URL!,
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  })
+}
 
-export async function initDb() {
+async function initDb() {
+  const client = getClient()
   await client.execute(`
     CREATE TABLE IF NOT EXISTS reservas (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,10 +25,11 @@ export async function initDb() {
       criado_em TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
     )
   `)
+  return client
 }
 
 export async function getReservas() {
-  await initDb()
+  const client = await initDb()
   const result = await client.execute('SELECT * FROM reservas ORDER BY criado_em DESC')
   return result.rows
 }
@@ -35,7 +39,7 @@ export async function insertReserva(
   modalidade: string, rua: string | null, numero: string | null,
   complemento: string | null, bairro: string | null
 ) {
-  await initDb()
+  const client = await initDb()
   const result = await client.execute({
     sql: `INSERT INTO reservas (nome, telefone, email, quantidade, modalidade, rua, numero, complemento, bairro)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
