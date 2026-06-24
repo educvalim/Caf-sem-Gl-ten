@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getReservas, insertReserva } from '@/lib/db'
 import { notificarWhatsApp } from '@/lib/whatsapp'
