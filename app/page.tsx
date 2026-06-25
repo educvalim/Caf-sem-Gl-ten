@@ -24,6 +24,7 @@ export default function Home() {
   const [step, setStep] = useState<'form' | 'success'>('form')
   const [modo, setModo] = useState<'retirada' | 'entrega'>('retirada')
   const [qtds, setQtds] = useState<Record<string, number>>({ 'paozinho-sem-gluten': 0, 'paozinho-doce': 0, 'docinho-de-natal': 0 })
+  const [estoque, setEstoque] = useState<Record<string, number>>({})
   const [waLink, setWaLink] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -33,6 +34,14 @@ export default function Home() {
   const [pixCopiaMsg, setPixCopiaMsg] = useState('')
   const [copiado, setCopiado] = useState(false)
   const qrRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    fetch('/api/estoque').then(r => r.json()).then((rows: {produto_id: string, quantidade: number}[]) => {
+      const map: Record<string, number> = {}
+      rows.forEach(r => { map[r.produto_id] = r.quantidade })
+      setEstoque(map)
+    }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (step === 'success' && totalPago > 0 && qrRef.current) {
@@ -45,7 +54,8 @@ export default function Home() {
   }, [step, totalPago])
 
   function changeQty(id: string, d: number) {
-    setQtds(q => ({ ...q, [id]: Math.max(0, Math.min(99, (q[id] ?? 0) + d)) }))
+    const max = estoque[id] ?? 99
+    setQtds(q => ({ ...q, [id]: Math.max(0, Math.min(max, (q[id] ?? 0) + d)) }))
   }
 
   const totalItens = Object.values(qtds).reduce((s, v) => s + v, 0)
@@ -87,7 +97,7 @@ if (totalItens === 0) errs.itens = 'Selecione ao menos 1 item.'
       const res = await fetch('/api/reservas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, quantidade: totalItens, itens: itensPedido, total: totalValor, modalidade: modo }),
+        body: JSON.stringify({ ...data, quantidade: totalItens, itens: itensPedido, total: totalValor, modalidade: modo, qtds }),
       })
       let json: Record<string, unknown> = {}
       try { json = await res.json() } catch { alert('Erro de comunicação com o servidor.'); return }
@@ -228,8 +238,11 @@ if (totalItens === 0) errs.itens = 'Selecione ao menos 1 item.'
             <div className="rounded-2xl p-5 shadow-sm" style={{ background: 'white', border: `1px solid ${C.claro}` }}>
               <p className="text-xs font-medium uppercase tracking-wider mb-4" style={{ color: '#000' }}>🍞 Seu pedido</p>
               <div className="space-y-3">
-                {ITENS.map((item, i) => (
-                  <div key={item.id}>
+                {ITENS.map((item, i) => {
+                  const disp = estoque[item.id] ?? null
+                  const esgotado = disp !== null && disp === 0
+                  return (
+                  <div key={item.id} style={{ opacity: esgotado ? 0.5 : 1 }}>
                     {i > 0 && <div className="mb-3" style={{ borderTop: `1px solid ${C.creme}` }} />}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -241,20 +254,26 @@ if (totalItens === 0) errs.itens = 'Selecione ao menos 1 item.'
                           <p className="text-sm font-medium" style={{ color: C.escuro }}>{item.nome}</p>
                           <p className="text-xs" style={{ color: C.medio }}>{item.desc}</p>
                           <p className="text-sm font-medium mt-0.5" style={{ color: C.dourado }}>R$ {item.preco.toFixed(2).replace('.', ',')}</p>
+                          {disp !== null && (
+                            <p className="text-xs mt-0.5" style={{ color: esgotado ? '#ef4444' : '#16a34a' }}>
+                              {esgotado ? 'Esgotado' : `${disp} disponível${disp !== 1 ? 'is' : ''}`}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center rounded-xl overflow-hidden" style={{ border: `1px solid ${C.claro}` }}>
-                        <button type="button" onClick={() => changeQty(item.id, -1)}
+                      <div className="flex items-center rounded-xl overflow-hidden" style={{ border: `1px solid ${C.claro}`, opacity: esgotado ? 0.4 : 1 }}>
+                        <button type="button" onClick={() => changeQty(item.id, -1)} disabled={esgotado}
                           className="w-9 h-9 flex items-center justify-center text-xl font-light transition-colors hover:opacity-80"
                           style={{ background: C.creme, color: C.escuro }}>−</button>
                         <span className="w-10 text-center text-base font-medium" style={{ color: C.escuro }}>{qtds[item.id]}</span>
-                        <button type="button" onClick={() => changeQty(item.id, 1)}
+                        <button type="button" onClick={() => changeQty(item.id, 1)} disabled={esgotado}
                           className="w-9 h-9 flex items-center justify-center text-xl font-light transition-colors hover:opacity-80"
                           style={{ background: C.creme, color: C.escuro }}>+</button>
                       </div>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
               {totalItens > 0 && (
                 <div className="flex justify-between items-center pt-3 mt-1" style={{ borderTop: `1px solid ${C.claro}` }}>

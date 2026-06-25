@@ -25,6 +25,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Endereço incompleto.' }, { status: 400 })
     }
 
+    // Descontar estoque
+    if (body.qtds) {
+      const { createClient } = await import('@libsql/client')
+      const client = createClient({ url: process.env.TURSO_DATABASE_URL!, authToken: process.env.TURSO_AUTH_TOKEN })
+      for (const [produto_id, qtd] of Object.entries(body.qtds as Record<string, number>)) {
+        if (qtd > 0) {
+          await client.execute({
+            sql: `UPDATE estoque SET quantidade = MAX(0, quantidade - ?), atualizado_em = datetime('now', 'localtime') WHERE produto_id = ?`,
+            args: [qtd, produto_id]
+          })
+        }
+      }
+    }
+
     const id = await insertReserva(nome, telefone, quantidade, modalidade, rua || null, numero || null, complemento || null, bairro || null)
 
     const endereco = modalidade === 'entrega'

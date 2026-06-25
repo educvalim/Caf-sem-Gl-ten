@@ -48,6 +48,16 @@ export default function AdminPage() {
   const [reservas, setReservas] = useState<Reserva[]>([])
   const [filtro, setFiltro] = useState<string>('todos')
   const [busca, setBusca] = useState('')
+  const [estoque, setEstoque] = useState<Record<string, number>>({})
+  const [estoqueInput, setEstoqueInput] = useState<Record<string, string>>({})
+  const [salvando, setSalvando] = useState<string | null>(null)
+  const [abaAdmin, setAbaAdmin] = useState<'reservas' | 'estoque'>('reservas')
+
+  const PRODUTOS = [
+    { id: 'paozinho-sem-gluten', nome: 'Pãozinho sem Glúten' },
+    { id: 'paozinho-doce', nome: 'Pãozinho Doce' },
+    { id: 'docinho-de-natal', nome: 'Docinho de Natal' },
+  ]
 
   const fetchReservas = useCallback(async () => {
     const res = await fetch('/api/reservas')
@@ -55,9 +65,34 @@ export default function AdminPage() {
     setReservas(data)
   }, [])
 
+  const fetchEstoque = useCallback(async () => {
+    const res = await fetch('/api/estoque')
+    const rows = await res.json()
+    const map: Record<string, number> = {}
+    const inputMap: Record<string, string> = {}
+    rows.forEach((r: { produto_id: string; quantidade: number }) => {
+      map[r.produto_id] = r.quantidade
+      inputMap[r.produto_id] = String(r.quantidade)
+    })
+    setEstoque(map)
+    setEstoqueInput(inputMap)
+  }, [])
+
   useEffect(() => {
-    if (auth) fetchReservas()
-  }, [auth, fetchReservas])
+    if (auth) { fetchReservas(); fetchEstoque() }
+  }, [auth, fetchReservas, fetchEstoque])
+
+  async function salvarEstoque(produto_id: string) {
+    setSalvando(produto_id)
+    const quantidade = parseInt(estoqueInput[produto_id] ?? '0') || 0
+    await fetch('/api/estoque', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ produto_id, quantidade }),
+    })
+    await fetchEstoque()
+    setSalvando(null)
+  }
 
   function login() {
     if (senha === SENHA) { setAuth(true); setSenhaErro(false) }
@@ -142,6 +177,12 @@ export default function AdminPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex gap-2">
+            <button onClick={() => setAbaAdmin('reservas')} className="text-xs rounded-lg px-3 py-1.5 hover:opacity-80"
+              style={{ background: abaAdmin === 'reservas' ? C.claro : 'transparent', color: C.creme, border: `1px solid ${C.claro}` }}>📋 Reservas</button>
+            <button onClick={() => setAbaAdmin('estoque')} className="text-xs rounded-lg px-3 py-1.5 hover:opacity-80"
+              style={{ background: abaAdmin === 'estoque' ? C.claro : 'transparent', color: C.creme, border: `1px solid ${C.claro}` }}>📦 Estoque</button>
+          </div>
           <button onClick={fetchReservas} className="text-xs rounded-lg px-3 py-1.5 hover:opacity-80"
             style={{ border: `1px solid ${C.claro}`, color: C.creme }}>↻ Atualizar</button>
           <button onClick={() => setAuth(false)} className="text-xs rounded-lg px-3 py-1.5 hover:opacity-80"
@@ -149,6 +190,42 @@ export default function AdminPage() {
         </div>
       </header>
 
+      {abaAdmin === 'estoque' && (
+        <div className="max-w-lg mx-auto p-6">
+          <div className="rounded-2xl p-6 shadow-sm" style={{ background: 'white', border: `1px solid ${C.claro}` }}>
+            <h2 className="text-base font-medium mb-4" style={{ color: C.escuro }}>📦 Controle de Estoque</h2>
+            <p className="text-xs mb-5" style={{ color: C.medio }}>Informe quantas unidades foram produzidas hoje. O estoque será descontado conforme os pedidos.</p>
+            <div className="space-y-4">
+              {PRODUTOS.map(p => (
+                <div key={p.id} className="flex items-center justify-between gap-4 p-3 rounded-xl" style={{ background: C.creme }}>
+                  <div>
+                    <p className="text-sm font-medium" style={{ color: C.escuro }}>{p.nome}</p>
+                    <p className="text-xs" style={{ color: C.medio }}>Disponível: <strong>{estoque[p.id] ?? 0}</strong></p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number" min="0"
+                      value={estoqueInput[p.id] ?? '0'}
+                      onChange={e => setEstoqueInput(prev => ({ ...prev, [p.id]: e.target.value }))}
+                      className="w-20 text-center rounded-lg border px-2 py-1.5 text-sm"
+                      style={{ borderColor: C.claro, color: C.escuro }}
+                    />
+                    <button
+                      onClick={() => salvarEstoque(p.id)}
+                      disabled={salvando === p.id}
+                      className="text-xs px-3 py-1.5 rounded-lg font-medium hover:opacity-80 disabled:opacity-50"
+                      style={{ background: C.escuro, color: C.creme }}>
+                      {salvando === p.id ? '...' : 'Salvar'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {abaAdmin === 'reservas' && (
       <div className="max-w-5xl mx-auto p-6 space-y-6">
         <div className="grid grid-cols-4 gap-4">
           {[
@@ -249,6 +326,7 @@ export default function AdminPage() {
           )}
         </div>
       </div>
+      )}
     </main>
   )
 }
