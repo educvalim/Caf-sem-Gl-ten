@@ -226,7 +226,7 @@ if (totalItens === 0) errs.itens = 'Selecione ao menos 1 item.'
 
             {/* Pedido */}
             <div className="rounded-2xl p-5 shadow-sm" style={{ background: 'white', border: `1px solid ${C.claro}` }}>
-              <p className="text-xs font-medium uppercase tracking-wider mb-4" style={{ color: '#000' }}>🛒 Seu pedido</p>
+              <p className="text-xs font-medium uppercase tracking-wider mb-4" style={{ color: '#000' }}>🍞 Seu pedido</p>
               <div className="space-y-3">
                 {ITENS.map((item, i) => (
                   <div key={item.id}>
