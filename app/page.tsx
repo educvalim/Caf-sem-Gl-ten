@@ -183,10 +183,6 @@ if (totalItens === 0) errs.itens = 'Selecione ao menos 1 item.'
   return (
     <main className="min-h-screen relative">
 
-      {/* Imagem de fundo da página inteira */}
-      <img src="/farinhafeliz.jpg" alt=""
-        className="fixed inset-0 w-full h-full"
-        style={{ objectFit: 'cover', zIndex: 0, opacity: 0.35 }} />
 
       {/* Lightbox */}
       {lightbox && (
@@ -196,17 +192,19 @@ if (totalItens === 0) errs.itens = 'Selecione ao menos 1 item.'
         </div>
       )}
 
-      {/* Hero com foto */}
-      <div className="relative w-full overflow-hidden" style={{ zIndex: 2, height: '320px' }}>
+      {/* Hero cobrindo toda a página */}
+      <div className="fixed inset-0" style={{ zIndex: 0 }}>
         <img src="/farinhafeliz.jpg" alt="Pães sem glúten"
-          className="absolute inset-0 w-full h-full"
+          className="w-full h-full"
           style={{ objectFit: 'cover', objectPosition: 'center top' }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent 40%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)' }} />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4" style={{ background: 'rgba(0,0,0,0.25)' }}>
-          <h1 className="text-6xl drop-shadow-lg" style={{ fontFamily: 'Godger, sans-serif', color: '#FDF6EC', letterSpacing: '0.03em' }}>Café sem Glúten</h1>
-          <p className="text-lg mt-3" style={{ color: '#E8D5B0', letterSpacing: '0.08em' }}>Reserve seu pão fresquinho</p>
-          <p className="absolute bottom-3 right-4 text-xs italic" style={{ color: '#E8D5B0' }}>Por Grasi de Moura Valim</p>
-        </div>
+        <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.30)' }} />
+      </div>
+
+      {/* Título fixo no topo */}
+      <div className="relative text-center pt-10 pb-6 px-4" style={{ zIndex: 2 }}>
+        <h1 className="text-6xl drop-shadow-lg" style={{ fontFamily: 'Godger, sans-serif', color: '#FDF6EC', letterSpacing: '0.03em' }}>Café sem Glúten</h1>
+        <p className="text-lg mt-3" style={{ color: '#E8D5B0', letterSpacing: '0.08em' }}>Reserve seu pão fresquinho</p>
+        <p className="text-xs italic mt-1" style={{ color: '#E8D5B0' }}>Por Grasi de Moura Valim</p>
       </div>
 
       <div className="relative flex justify-center p-4" style={{ zIndex: 2 }}>
