@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { gerarPixCopiaCola } from '@/lib/pix'
 
-const PIX_CHAVE = '47999714485'
+const PIX_CHAVE = 'grasivalim14@gmail.com'
 const PIX_NOME = 'Cafe sem Gluten'
 const PIX_CIDADE = 'Joinville'
 
