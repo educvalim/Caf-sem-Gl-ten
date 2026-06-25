@@ -183,12 +183,10 @@ if (totalItens === 0) errs.itens = 'Selecione ao menos 1 item.'
   return (
     <main className="min-h-screen relative">
 
-      {/* Vídeo de fundo da página inteira */}
-      <video autoPlay muted loop playsInline
+      {/* Imagem de fundo da página inteira */}
+      <img src="/farinhafeliz.jpg" alt=""
         className="fixed inset-0 w-full h-full"
-        style={{ objectFit: 'cover', zIndex: 0 }}>
-        <source src="/videos/hero.mp4" type="video/mp4" />
-      </video>
+        style={{ objectFit: 'cover', zIndex: 0, opacity: 0.35 }} />
 
       {/* Lightbox */}
       {lightbox && (
