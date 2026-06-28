@@ -212,7 +212,7 @@ if (totalItens === 0) errs.itens = 'Selecione ao menos 1 item.'
 
       {/* Título fixo no topo */}
       <div className="relative text-center pt-10 pb-6 px-4" style={{ zIndex: 2 }}>
-        <h1 className="text-6xl drop-shadow-lg" style={{ fontFamily: 'var(--font-rye), serif', color: '#FDF6EC', letterSpacing: '0.03em' }}>Café sem Glúten</h1>
+        <h1 className="text-6xl drop-shadow-lg" style={{ fontFamily: 'var(--font-rethink), sans-serif', color: '#FDF6EC', letterSpacing: '0.03em', fontWeight: 800 }}>Café sem Glúten</h1>
         <p className="text-lg mt-3" style={{ color: '#E8D5B0', letterSpacing: '0.08em' }}>Reserve seu pão fresquinho</p>
         <p className="text-xs italic mt-1" style={{ color: '#E8D5B0' }}>Por Grasi de Moura Valim</p>
       </div>
