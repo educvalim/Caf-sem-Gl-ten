@@ -256,7 +256,7 @@ if (totalItens === 0) errs.itens = 'Selecione ao menos 1 item.'
                           <p className="text-sm font-medium mt-0.5" style={{ color: C.dourado }}>R$ {item.preco.toFixed(2).replace('.', ',')}</p>
                           {disp !== null && (
                             <p className="text-xs mt-0.5" style={{ color: esgotado ? '#ef4444' : '#16a34a' }}>
-                              {esgotado ? 'Esgotado' : `${disp} disponível${disp !== 1 ? 'eis' : ''}`}
+                              {esgotado ? 'Esgotado' : `${disp} ${disp !== 1 ? 'disponíveis' : 'disponível'}`}
                             </p>
                           )}
                         </div>
